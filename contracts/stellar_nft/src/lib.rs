@@ -124,5 +124,4 @@ impl StellarNftContract {
     }
 }
 
-
 mod test;
