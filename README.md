@@ -1,21 +1,103 @@
-# Soroban Project
+# StellarNFT Project
+
+The **StellarNFT** project is a full-stack application that allows you to mint, transfer, and manage NFTs (Non-Fungible Tokens) on the **Stellar** blockchain using **Soroban Smart Contracts**. The project includes a frontend for interacting with the blockchain and a smart contract written in Rust using the Soroban framework.
+
+## Features
+- Mint NFTs on the Stellar blockchain.
+- Transfer NFTs from one address to another.
+- Retrieve the owner of an NFT by its token ID.
+- Burn (delete) NFTs by their token IDs.
+- Retrieve metadata associated with NFTs.
 
 ## Project Structure
 
-This repository uses the recommended structure for a Soroban project:
+This repository follows a structure that supports both the Soroban smart contract and the frontend application.
+
 ```text
 .
 ├── contracts
-│   └── hello_world
-│       ├── src
-│       │   ├── lib.rs
-│       │   └── test.rs
-│       └── Cargo.toml
-├── Cargo.toml
-└── README.md
+│   └── stellar_nft
+│       ├── src
+│       │   ├── lib.rs           # The main smart contract logic
+│       │   └── test.rs          # Tests for the contract
+│       └── Cargo.toml           # Contract dependencies
+├── nft-frontend
+│   ├── public
+│   │   └── index.html          # The main HTML file for the frontend
+│   └── src
+│       ├── components
+│       │   └── StellarNFT.js    # React component to interact with the contract
+│       ├── App.js               # Main React application file
+│       └── index.js             # Entry point of the React app
+│   └── package.json             # Frontend dependencies
+├── Cargo.toml                  # Top-level Cargo.toml file for the workspace
+└── README.md                   # This file
+```
+# Stellar NFT Contract Deployment Steps
+
+## Requirements
+- [Nodejs](https://nodejs.org/en/)
+  - You'll know you've installed nodejs right if you can run:
+    - `node --version` and get an ouput like: `vx.x.x`
+    - 
+## clone git repository and install dependencies
+```
+git clone https://github.com/kapildev5262/stellar-nft-project
+cd stellar-nft-project
+npm install
+```
+## Steps to Deploy the Contract
+### 1. Build and test smart contract 
+```
+cargo build --target wasm32-unknown-unknown --release
+cargo build
+cargoo test
+```
+This generates the Wasm file at: target/wasm32-unknown-unknown/release/stellar_nft.wasm.
+### 2. Install the Contract Code on Stellar Testnet
+Run the following command to upload the compiled Wasm file to the Testnet:
+```
+stellar contract install \
+  --network testnet \
+  --source alice \
+  --wasm target/wasm32-unknown-unknown/release/stellar_nft.was
+```
+- Replace alice with your Stellar account (configured in your environment).
+- Note the output Wasm hash generated in this step.
+### 3. Deploy the Contract
+Use the Wasm hash from the previous step to deploy the contract:
+```
+stellar contract deploy \
+  --wasm-hash <WASM_HASH> \
+  --source alice \
+  --network testnet
+```
+Replace <WASM_HASH> with the actual hash provided during the installation.
+### 4. Interact with the Contract
+Once deployed, you can call contract functions using the Stellar CLI or integrate them into your application.
+
+# Intracting with frontend
+
+### 1. update your contract address and Pinata API key
+Update your soroban nft smart contract address in frontend 
+```
+const contractAddress = "80c17635b126b9def6200f304e33a53fba907ac3610a5b777d0cb00d24a0e191"; // Replace with actual contract address
+```
+Update your Pinata API key in frontend 
+```
+Authorization: `39a660ce7ecbb7ae4114`, // Replace with your Pinata API key
 ```
 
-- New Soroban contracts can be put in `contracts`, each in their own directory. There is already a `hello_world` contract in there to get you started.
-- If you initialized this project with any other example contracts via `--with-example`, those contracts will be in the `contracts` directory as well.
-- Contracts should have their own `Cargo.toml` files that rely on the top-level `Cargo.toml` workspace for their dependencies.
-- Frontend libraries can be added to the top-level directory as well. If you initialized this project with a frontend template via `--frontend-template` you will have those files already included.
+### 2. install all dependencies and plugins
+```
+cd nft-frontend
+npm install
+```
+This install all required dependencies and plugins for you frontend.
+### 3. Open in browser and intract
+```
+npm run dev
+```
+This will run react app o localhost port now open it in browser.
+Connect to freighter wallet.
+Initialize the contract and start using it.
