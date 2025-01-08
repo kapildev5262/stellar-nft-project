@@ -60,7 +60,7 @@ Run the following command to upload the compiled Wasm file to the Testnet:
 stellar contract install \
   --network testnet \
   --source alice \
-  --wasm target/wasm32-unknown-unknown/release/stellar_nft.was
+  --wasm target/wasm32-unknown-unknown/release/stellar_nft.wasm
 ```
 - Replace alice with your Stellar account (configured in your environment).
 - Note the output Wasm hash generated in this step.
