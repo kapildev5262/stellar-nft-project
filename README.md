@@ -51,7 +51,7 @@ npm install
 ```
 cargo build --target wasm32-unknown-unknown --release
 cargo build
-cargoo test
+cargo test
 ```
 This generates the Wasm file at: target/wasm32-unknown-unknown/release/stellar_nft.wasm.
 ### 2. Install the Contract Code on Stellar Testnet
