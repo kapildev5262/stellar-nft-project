@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import StellarSdk from "@stellar/stellar-sdk";
-import { freighterApi } from "@stellar/freighter-api";
+import { isConnected, requestAccess, getAddress } from "@stellar/freighter-api";
 import axios from "axios";
 import "./StellarNFT.css"; // Assuming your CSS file is named StellarNFT.css
 
@@ -9,10 +9,14 @@ const StellarNFT = () => {
   const [tokenID, setTokenID] = useState("");
   const [metadata, setMetadata] = useState({ name: "", description: "", image: null });
   const [contract, setContract] = useState(null);
-  const [loading, setLoading] = useState(false); // Loading state for better UX
   const [nftOwner, setNftOwner] = useState("");
   const [nftMetadata, setNftMetadata] = useState("");
   const [transferStatus, setTransferStatus] = useState("");
+
+  const [isFreighterConnected, setIsFreighterConnected] = useState(false);
+  const [userAddress, setUserAddress] = useState(null);
+  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Initialize connection to the Soroban contract
   const initializeContract = async () => {
@@ -27,20 +31,55 @@ const StellarNFT = () => {
     }
   };
 
-  // Connect Freighter wallet
+  // Check if Freighter is connected
+  const checkFreighterConnection = async () => {
+    try {
+      setLoading(true);
+      const connectionStatus = await isConnected();
+      setIsFreighterConnected(connectionStatus.isConnected);
+      setLoading(false);
+    } catch (error) {
+      setIsError(true);
+      console.error("Error checking Freighter connection", error);
+      setLoading(false);
+    }
+  };
+
+  // Request access and retrieve public key
   const connectWallet = async () => {
     try {
-      console.log("Checking if Freighter is available...");
-      if (!window.freighterApi) {
-        throw new Error("Freighter wallet not detected. Please install Freighter.");
+      setLoading(true);
+      const accessObj = await requestAccess();
+      if (accessObj.error) {
+        setIsError(true);
+        alert("Error connecting to Freighter");
+      } else {
+        setUserAddress(accessObj.address);
       }
-      console.log("Freighter wallet detected. Attempting to get public key...");
-      const publicKey = await window.freighterApi.getPublicKey();
-      console.log("Connected Wallet Public Key:", publicKey);
-      setAccount(publicKey); // Save public key to state
+      setLoading(false);
     } catch (error) {
-      console.error("Error connecting to Freighter wallet:", error);
-      alert(error.message);
+      setIsError(true);
+      console.error("Error requesting access", error);
+      setLoading(false);
+    }
+  };
+
+  // Get the address without requesting access
+  const getWalletAddress = async () => {
+    try {
+      setLoading(true);
+      const addressObj = await getAddress();
+      if (addressObj.error) {
+        setIsError(true);
+        alert("Error retrieving address");
+      } else {
+        setUserAddress(addressObj.address);
+      }
+      setLoading(false);
+    } catch (error) {
+      setIsError(true);
+      console.error("Error retrieving address", error);
+      setLoading(false);
     }
   };
 
@@ -175,12 +214,34 @@ const StellarNFT = () => {
     <div className="nft-container">
       <h1 className="heading">Stellar NFT Minting</h1>
       <div className="actions">
-        <button className="btn" onClick={connectWallet}>
-          Connect Wallet
+        <button className="btn" onClick={checkFreighterConnection} disabled={loading}>
+          {loading ? "Checking..." : "Check Connection"}
         </button>
-        <button className="btn" onClick={initializeContract}>
-          Initialize Contract
-        </button>
+
+        {isFreighterConnected && !userAddress && (
+          <div>
+            <button className="btn" onClick={connectWallet} disabled={loading}>
+              {loading ? "Connecting..." : "Connect Wallet"}
+            </button>
+          </div>
+        )}
+
+        {!isFreighterConnected && !loading && (
+          <div>
+            <p>Freighter is not connected. Please install the Freighter extension.</p>
+          </div>
+        )}
+
+        {userAddress && (
+          <div>
+            <p>Connected! Address: {userAddress}</p>
+            <button className="btn" onClick={initializeContract}>
+              Initialize Contract
+            </button>
+          </div>
+        )}
+
+        {isError && <p style={{ color: "red" }}>Something went wrong. Please try again.</p>}
       </div>
 
       <div className="mint-form">
@@ -217,7 +278,7 @@ const StellarNFT = () => {
       </div>
 
       <div className="nft-info">
-      <input
+        <input
           className="input-field"
           type="number"
           placeholder="Token ID"
