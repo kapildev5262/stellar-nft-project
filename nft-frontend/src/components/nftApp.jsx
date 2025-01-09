@@ -21,7 +21,7 @@ const StellarNFT = () => {
   // Initialize connection to the Soroban contract
   const initializeContract = async () => {
     const server = new StellarSdk.Server("https://horizon-testnet.stellar.org");
-    const contractAddress = "80c17635b126b9def6200f304e33a53fba907ac3610a5b777d0cb00d24a0e191"; // Replace with actual contract address
+    const contractAddress = "CDHYIPJYPPJYZCTEYBYMBRV2M6TYLGE7BKM45JS5SQIE6JWM3M37SRAR"; // Replace with actual contract address
     try {
       const sorobanContract = new StellarSdk.SorobanContract(server, contractAddress);
       setContract(sorobanContract);
